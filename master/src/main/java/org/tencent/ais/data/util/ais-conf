@@ -1,0 +1,21 @@
+#database.ip 10.198.30.113
+#database.user root
+#database.pass H6fVXyb_82
+
+database.ip 127.0.0.1
+database.user root
+database.pass root
+database.port 3306
+server.port 9292
+server.ip 10.151.15.155
+server.timeout 60000
+executor.timeout 300000
+executor.memory 1g
+task_initial 0
+task_run 1
+task_success 2
+task_failed 3
+platform_tf 1
+platform_xgboost 2
+platform_mpi 3
+platform_spark 4

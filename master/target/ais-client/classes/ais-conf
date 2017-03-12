@@ -1,0 +1,11 @@
+database.ip 10.198.30.113
+database.user root
+database.pass H6fVXyb_82
+task_initial 0
+task_run 1
+task_success 2
+task_failed 3
+platform_tf 1
+platform_xgboost 2
+platform_mpi 3
+platform_spark 4
