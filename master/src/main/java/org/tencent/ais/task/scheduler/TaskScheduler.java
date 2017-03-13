@@ -56,6 +56,7 @@ public class TaskScheduler {
     String executorHostname = ClientMachineManager.getInstance().getMachineToPlatformByRandom(platformId);
     //Executor executor = getExecutor(platformId, executorId, executorHostname, event.getTaskInfo());
     // TODO 创建一个ExecutorRunner，然后传入参数去远程启动一个exeuctor
+    new ExecutorRunner(executorId, String.valueOf(platformId), executorHostname).startExecutor();
     ExecutorManager.getInstance().addExecutorIdToIp(executorId, executorHostname);
     ExecutorManager.getInstance().setExecutorIdToTaskInfo(executorId, event.getTaskInfo());
     ExecutorManager.getInstance().setExecutorLastseen(executorId, System.currentTimeMillis());
@@ -162,13 +163,13 @@ public class TaskScheduler {
 
   private Executor getExecutor(int platformId, String executorId, String executorHostname, TaskInfo taskInfo) {
     if (platformId == 1) {
-      return new TFExecutor(executorId, executorHostname, taskInfo);
+      return new TFExecutor(executorId, executorHostname);
     } else if (platformId == 2) {
-      return new XgboostExecutor(executorId, executorHostname, taskInfo);
+      return new XgboostExecutor(executorId, executorHostname);
     } else if (platformId == 3) {
-      return new MPIExecutor(executorId, executorHostname, taskInfo);
+      return new MPIExecutor(executorId, executorHostname);
     } else {
-      return new SparkExecutor(executorId, executorHostname, taskInfo);
+      return new SparkExecutor(executorId, executorHostname);
     }
   }
 

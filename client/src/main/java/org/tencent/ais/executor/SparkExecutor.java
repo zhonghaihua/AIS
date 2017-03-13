@@ -7,17 +7,22 @@ import org.tencent.ais.task.TaskInfo;
  */
 public class SparkExecutor extends Executor {
 
-  public SparkExecutor(String executorId, String executorHostname, TaskInfo taskInfo) {
-    super(executorId, executorHostname, taskInfo);
+  public SparkExecutor(String executorId, String executorHostname) {
+    super(executorId, executorHostname);
   }
 
   @Override
-  public void runTask(TaskInfo taskInfo) {
+  protected void run(ExecutorInfo executorInfo) {
 
   }
 
   @Override
-  public void reportHeartbeat() {
+  public void launchTask() {
+
+  }
+
+  @Override
+  public void reportHeartbeat(ExecutorInfo executorInfo) {
 
   }
 

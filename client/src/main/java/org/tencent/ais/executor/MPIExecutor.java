@@ -1,33 +1,99 @@
 package org.tencent.ais.executor;
 
+import org.hyperic.sigar.SigarException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.tencent.ais.execute.TaskRunner;
+import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.task.TaskInfo;
+import org.tencent.ais.util.SystemInfoUtils;
+
+import java.util.Map;
 
 /**
  * Created by iwardzhong on 2017/3/3.
  */
 public class MPIExecutor extends Executor {
 
-  public MPIExecutor(String executorId, String executorHostname, TaskInfo taskInfo) {
-    super(executorId, executorHostname, taskInfo);
+  private Logger log = LoggerFactory.getLogger("MPIExecutor");
+
+  public MPIExecutor(String executorId, String executorHostname) {
+    super(executorId, executorHostname);
+    init();
+  }
+
+  private void init() {
+    isRun = true;
+    launchTask();
+    executorInfo.setExecutorHostname(executorHostname);
+    executorInfo.setExecutorId(executorId);
+    String taskId;
+    if (taskInfo.getTaskData().getDataType() == 0) {
+      taskId = String.valueOf(taskInfo.taskData.getAccessId());
+    } else {
+      taskId = String.valueOf(taskInfo.taskData.getTaskId());
+    }
+    executorInfo.setTaskId(taskId);
+    executorInfo.setLastUpdate(System.currentTimeMillis());
   }
 
   @Override
-  public void runTask(TaskInfo taskInfo) {
+  protected void run(ExecutorInfo executorInfo) {
+    this.taskRunner.start();
+    while (isRun) {
+      resourceInfo.setFreecpu(10);
+      resourceInfo.setPlatformFreememory(0);
+      resourceInfo.setTotalcpu(10);
+      resourceInfo.setBusycpu(10);
+      try {
+        resourceInfo.setTotalmemory(SystemInfoUtils.getTotalMemory());
+        resourceInfo.setFreememory(SystemInfoUtils.getFreeMemory());
+      } catch (SigarException e) {
+        log.error("Get system info failed " + e.getMessage());
+      }
+      executorInfo.setExecutorResourceInfo(resourceInfo);
+      reportHeartbeat(executorInfo);
+    }
+  }
 
+  private void handleHeartbeatResponse(Map<String, String> res) {
+    String cmd = res.get("cmd");
+    if (cmd.equals("kill")) {
+      stop();
+    } else if (cmd.equals("run")) {
+      executorInfo.setLastUpdate(Long.parseLong(res.get(executorId)));
+    }
   }
 
   @Override
-  public void reportHeartbeat() {
+  public void launchTask() {
+    ExecutorInfo executorInfo = new ExecutorInfo();
+    executorInfo.setExecutorId(this.executorId);
+    executorInfo.setExecutorHostname(this.executorHostname);
+    this.taskInfo = this.mespc.launchTaskToRun(executorInfo);
+    this.taskRunner = new TaskRunner(taskInfo);
+  }
 
+  @Override
+  public void reportHeartbeat(ExecutorInfo executorInfo) {
+    Map<String, String> res = this.mespc.reportHeartbeat(executorInfo);
+    handleHeartbeatResponse(res);
   }
 
   @Override
   public void killTask() {
-
+    this.taskRunner.destroy();
   }
 
   @Override
   public void stop() {
+    killTask();
+    this.isRun = false;
+  }
 
+
+  public static void main(String argv[]) throws Exception {
+    String executorId = argv[0];
+    new MPIExecutor(executorId, SystemInfoUtils.getLocalHostIp());
   }
 }

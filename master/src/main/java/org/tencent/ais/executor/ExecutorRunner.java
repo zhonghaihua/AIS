@@ -1,6 +1,9 @@
 package org.tencent.ais.executor;
 
 import org.tencent.ais.data.util.CommonConf;
+import org.tencent.ais.util.AISUtils;
+
+import java.io.IOException;
 
 /**
  * Created by iwardzhong on 2017/3/1.
@@ -18,20 +21,27 @@ public class ExecutorRunner {
   }
 
   public String prepareEnvironment() {
-    // TODO 准备基础环境
+    // TODO 准备基础环境 这个暂时不需要做什么，是为了以后准备的
     return null;
   }
 
   public String prepareCommand() {
-    // TODO 拼接执行命令
-    return null;
+    String exeCmd = "start-ais-client -platform " + platformId + "-executorId " + executorId + " > executor_ " + executorId + " .log";
+    String cmd = "ssh root@" + clientIp + " " + exeCmd;
+
+    return cmd;
   }
 
   public void startExecutor() {
-    // TODO 远程执行命令
+    String cmd = prepareCommand();
+    try {
+      AISUtils.execuShellCmd(executorId, cmd);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
-  public static void main(String argv[]) throws Exception {
-
-  }
+//  public static void main(String argv[]) throws Exception {
+//
+//  }
 }
