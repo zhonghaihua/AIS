@@ -2,6 +2,7 @@ package org.tencent.ais.executor;
 
 import org.tencent.ais.communication.client.MasterExecutorServiceProtocolClient;
 import org.tencent.ais.execute.TaskRunner;
+import org.tencent.ais.monitor.TaskMonitorManager;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.task.TaskInfo;
 
@@ -16,7 +17,6 @@ public abstract class Executor {
   protected String executorId;
   protected String executorHostname;
   protected TaskInfo taskInfo;
-  protected boolean isRun = false;
   protected TaskRunner taskRunner;
   protected ExecutorInfo executorInfo = new ExecutorInfo();
   protected ResourceInfo resourceInfo = new ResourceInfo();
@@ -24,6 +24,9 @@ public abstract class Executor {
   public Executor(String executorId, String hostname) {
     this.executorId = executorId;
     this.executorHostname = hostname;
+    TaskMonitorManager.getInstance().setExecutorId(executorId);
+    TaskMonitorManager.getInstance().setCurrenProcessPid(getCurrentProcessID());
+    TaskMonitorManager.getInstance().setMespc(mespc);
   }
 
   public String getExecutorId() {

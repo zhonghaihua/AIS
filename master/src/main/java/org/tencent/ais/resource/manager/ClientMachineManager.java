@@ -27,22 +27,28 @@ public class ClientMachineManager {
   public List<String> getMachineListToPlatform(int platformId) {
     try {
       this.putLock.lockInterruptibly();
+      return platformToClientMachineList.get(platformId);
     } catch (InterruptedException e) {
       e.printStackTrace();
+    } finally {
+      this.putLock.unlock();
     }
-    return platformToClientMachineList.get(platformId);
+    return null;
   }
 
   public String getMachineToPlatformByRandom(int platformId) {
     try {
       this.putLock.lockInterruptibly();
+      List<String> machineList = platformToClientMachineList.get(platformId);
+      Random r = new Random(5);
+      int index = r.nextInt(machineList.size());
+      return machineList.get(index);
     } catch (InterruptedException e) {
       e.printStackTrace();
+    } finally {
+      this.putLock.unlock();
     }
-    List<String> machineList = platformToClientMachineList.get(platformId);
-    Random r = new Random(5);
-    int index = r.nextInt(machineList.size());
-    return machineList.get(index);
+    return  null;
   }
 
   public String getTheBestMachineToPlatform(int platformId) {
@@ -50,6 +56,8 @@ public class ClientMachineManager {
       this.putLock.lockInterruptibly();
     } catch (InterruptedException e) {
       e.printStackTrace();
+    } finally {
+      this.putLock.unlock();
     }
     // TODO find the best client
     return null;
@@ -59,18 +67,23 @@ public class ClientMachineManager {
           int platformId, List<String> machineList) {
     try {
       this.putLock.lockInterruptibly();
+      platformToClientMachineList.put(platformId, machineList);
     } catch (InterruptedException e) {
       e.printStackTrace();
+    } finally {
+      this.putLock.unlock();
     }
-    platformToClientMachineList.put(platformId, machineList);
+
+
   }
 
   public void initialize() {
     List<String> machineList = new ArrayList<>();
-    machineList.add("172.27.17.12");
-    machineList.add("172.26.17.12");
-    machineList.add("172.25.17.12");
+    machineList.add("10.151.15.155");
+    machineList.add("10.151.15.155");
+    machineList.add("10.151.15.155");
     updatePlatformToClientMachineList(5, machineList);
+    updatePlatformToClientMachineList(3, machineList);
 
   }
 

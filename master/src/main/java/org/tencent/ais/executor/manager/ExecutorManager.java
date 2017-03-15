@@ -3,9 +3,7 @@ package org.tencent.ais.executor.manager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tencent.ais.communication.protocol.ExecutorMessage;
 import org.tencent.ais.data.util.CommonConf;
-import org.tencent.ais.executor.Executor;
 import org.tencent.ais.executor.ExecutorInfo;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.task.TaskInfo;
@@ -29,6 +27,8 @@ public class ExecutorManager {
   private Map<String, ResourceInfo> clientResource = new ConcurrentHashMap<>();
   private Map<String, TaskInfo> executorIdToTaskInfo = new HashMap<>();
   private Map<String, Process> executorIdToProcess = new HashMap<>();
+  private Map<String, String> executorIdToTaskPid = new HashMap<>();
+  private Map<String, String> executorIdToPid = new HashMap<>();
 
   // 主要针对客户端一直Executor卡住的情况，其余心跳超时都是发送kill命令去kill
   private Thread checkExecutorHeartbeat = new Thread(new Runnable() {
@@ -124,6 +124,11 @@ public class ExecutorManager {
 
   public void setExecutorIdToProcess(String executorId, Process process) {
     executorIdToProcess.put(executorId, process);
+  }
+
+  public void setExecutorIdToTaskPidAndExecutorPid(String executorId, String taskPid, String executorPid) {
+    executorIdToTaskPid.put(executorId, taskPid);
+    executorIdToPid.put(executorId, executorPid);
   }
 
 }

@@ -13,7 +13,6 @@ import org.tencent.ais.task.event.RunTaskEvent;
 import org.tencent.ais.task.event.UpdateTaskEvent;
 import org.tencent.ais.task.manager.TaskSetManager;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by iwardzhong on 2017/2/22.
@@ -51,9 +50,13 @@ public class TaskScheduler {
   }
 
   public void handleTaskToRun(Event event) {
+    System.out.println("start to handle");
     String executorId = String.valueOf(getAutomaticExecutorId());
     int platformId = event.getTaskInfo().getPlatform();
+    System.out.println(platformId);
     String executorHostname = ClientMachineManager.getInstance().getMachineToPlatformByRandom(platformId);
+    System.out.println(executorHostname);
+    System.out.println("hello");
     //Executor executor = getExecutor(platformId, executorId, executorHostname, event.getTaskInfo());
     // TODO 创建一个ExecutorRunner，然后传入参数去远程启动一个exeuctor
     new ExecutorRunner(executorId, String.valueOf(platformId), executorHostname).startExecutor();
@@ -138,7 +141,7 @@ public class TaskScheduler {
       }
     } else {
       res = taskDataManager.updateTaskStatusByTaskId(taskData.getTaskId(),
-              taskData.getStatus(), taskData.getRate(), taskData.getErrMsg(),
+              taskData.getStatus(), taskData.getRate(), "''",
               taskData.getStartTime(), taskData.getEndTime());
       if (!res) {
         log.error("update task info failed, task id is " + taskData.getTaskId());
@@ -161,16 +164,16 @@ public class TaskScheduler {
     return eventProcessLoop;
   }
 
-  private Executor getExecutor(int platformId, String executorId, String executorHostname, TaskInfo taskInfo) {
-    if (platformId == 1) {
-      return new TFExecutor(executorId, executorHostname);
-    } else if (platformId == 2) {
-      return new XgboostExecutor(executorId, executorHostname);
-    } else if (platformId == 3) {
-      return new MPIExecutor(executorId, executorHostname);
-    } else {
-      return new SparkExecutor(executorId, executorHostname);
-    }
-  }
+//  private Executor getExecutor(int platformId, String executorId, String executorHostname, TaskInfo taskInfo) {
+//    if (platformId == 1) {
+//      return new TFExecutor(executorId, executorHostname);
+//    } else if (platformId == 2) {
+//      return new XgboostExecutor(executorId, executorHostname);
+//    } else if (platformId == 3) {
+//      return new MPIExecutor(executorId, executorHostname);
+//    } else {
+//      return new SparkExecutor(executorId, executorHostname);
+//    }
+//  }
 
 }

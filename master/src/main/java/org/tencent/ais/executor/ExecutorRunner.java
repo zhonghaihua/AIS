@@ -26,16 +26,20 @@ public class ExecutorRunner {
   }
 
   public String prepareCommand() {
-    String exeCmd = "start-ais-client -platform " + platformId + "-executorId " + executorId + " > executor_ " + executorId + " .log";
-    String cmd = "ssh root@" + clientIp + " " + exeCmd;
+    String exeCmd = "'cd /data/iward/ais/bin/ && sh start-ais-client -platform " + platformId +
+            " -executorId " + executorId + " > executor_" + executorId + ".log 2>&1 '";
+    String cmd = "ssh root@" + clientIp + " " + exeCmd ;
 
     return cmd;
   }
 
   public void startExecutor() {
+    System.out.println("start executor");
     String cmd = prepareCommand();
+    System.out.println("exec cmd: " + cmd);
     try {
-      AISUtils.execuShellCmd(executorId, cmd);
+      String res = AISUtils.asynExecuShellCmd(executorId, cmd);
+      System.out.println("cmd res: " + res);
     } catch (IOException e) {
       e.printStackTrace();
     }

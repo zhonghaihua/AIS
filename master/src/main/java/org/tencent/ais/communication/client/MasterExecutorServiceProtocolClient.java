@@ -21,8 +21,8 @@ import java.util.Map;
  * Created by iwardzhong on 2017/3/6.
  */
 public class MasterExecutorServiceProtocolClient implements MasterExecutorRpcProtocol {
-//  private static String server_ip = CommonConf.SERVER_IP;
-  private static String server_ip = "10.27.11.148"; //test ip
+  private static String server_ip = CommonConf.SERVER_IP;
+//  private static String server_ip = "10.27.11.59"; //test ip
   private static int server_port = CommonConf.SERVER_PORT;
   private static int server_timeout = CommonConf.SERVER_TIMEOUT;
   private MasterExecutorServiceProtocol.Client masterExecutorServiceProtocolClient;
@@ -37,7 +37,7 @@ public class MasterExecutorServiceProtocolClient implements MasterExecutorRpcPro
   }
 
   private void initMasterExecutorServiceProtocolClient() {
-    TTransport masterExecutorServiceProtocolTransport = new TSocket(server_ip, server_port, server_timeout);
+    masterExecutorServiceProtocolTransport = new TSocket(server_ip, server_port, server_timeout);
     TProtocol tProtocol = new TCompactProtocol(masterExecutorServiceProtocolTransport);
     masterExecutorServiceProtocolClient = new MasterExecutorServiceProtocol.Client(tProtocol);
   }
@@ -48,6 +48,7 @@ public class MasterExecutorServiceProtocolClient implements MasterExecutorRpcPro
     try {
       masterExecutorServiceProtocolTransport.open();
       TaskMessage taskMessage = masterExecutorServiceProtocolClient.launchTaskToRun(executorInfo.getExecutorId());
+      System.out.println(taskMessage.getAlgoId());
       String executorHostname = SystemInfoUtils.getLocalHostIp();
       taskInfo = ConvertUtil.taskMessageToTaskInfo(taskMessage, executorHostname);
     } catch (TException e) {
@@ -94,6 +95,22 @@ public class MasterExecutorServiceProtocolClient implements MasterExecutorRpcPro
       TaskEvent taskEvent = ConvertUtil.eventToTaskEvent(event);
       masterExecutorServiceProtocolTransport.open();
       res = masterExecutorServiceProtocolClient.updateTaskEvent(taskEvent, clientIp);
+    } catch (TException e) {
+      e.printStackTrace();
+    } finally {
+      if (masterExecutorServiceProtocolTransport != null) {
+        masterExecutorServiceProtocolTransport.close();
+      }
+    }
+    return res;
+  }
+
+  @Override
+  public boolean sendTaskPidAndExecutorPid(String taskPid, String executorId, String executorPid) {
+    boolean res = false;
+    try {
+      masterExecutorServiceProtocolTransport.open();
+      res = masterExecutorServiceProtocolClient.sendTaskPidAndExecutorPid(taskPid, executorId, executorPid);
     } catch (TException e) {
       e.printStackTrace();
     } finally {

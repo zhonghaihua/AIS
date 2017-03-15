@@ -77,6 +77,13 @@ public class TaskDataManager {
       taskData.setEndTime(dateFormat(rs.getTimestamp("end_time")));
       taskData.setModifyTime(dateFormat(rs.getTimestamp("modify_time")));
 
+      // test
+      taskData.setAccessStatus(0);
+      taskData.setAccessId(1);
+      taskData.setAccessProgress(100);
+      taskData.setAlgoDescription("aaa");
+      taskData.setAlgoName("aaa");
+
       taskDataList.add(taskData);
     }
 
@@ -113,6 +120,17 @@ public class TaskDataManager {
       taskData.setEndTime(dateFormat(rs.getTimestamp("end_time")));
       taskData.setModifyTime(dateFormat(rs.getTimestamp("modify_time")));
 
+      // test
+      taskData.setTaskId(1);
+      taskData.setInputFormat("aaa");
+      taskData.setInputPath("aaa");
+      taskData.setOutputPath("aaa");
+      taskData.setParameterPath("aaa");
+      taskData.setTaskType(1);
+      taskData.setRate(100);
+      taskData.setUserId(12);
+      taskData.setTaskInfo("aaa");
+
       taskDataList.add(taskData);
     }
 
@@ -122,8 +140,9 @@ public class TaskDataManager {
   public boolean updateTaskStatusByTaskId(int taskId, int status, int rate,
                                           String errmsg, String startTime, String endTime) {
     String sql = "update task_access_test_iward set status = " + status + ", rate = " + rate +
-            ", err_msg = " + errmsg + ", start_time = " + startTime + ", end_time = " +
-            endTime + " where task_id = " + taskId;
+            ", err_msg = " + errmsg + ", start_time = '" + startTime + "', end_time = '" +
+            endTime + "' where task_id = " + taskId;
+    System.out.println(sql);
     boolean res = dbUtils.execUpdate(sql);
     return res;
   }

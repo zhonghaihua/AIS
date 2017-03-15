@@ -5,6 +5,8 @@ import org.tencent.ais.executor.ExecutorInfo;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.util.SystemInfoUtils;
 
+import java.util.Map;
+
 /**
  * Created by iwardzhong on 2017/3/6.
  */
@@ -27,7 +29,7 @@ public class TestClient {
     executorInfo.setTaskId("12");
     executorInfo.setLastUpdate(3000L);
     executorInfo.setExecutorHostname("10.27.11.148");
-    String result = client.reportHeartbeat(executorInfo);
+    Map<String, String> result = client.reportHeartbeat(executorInfo);
     System.out.println("result: " + result);
   }
 

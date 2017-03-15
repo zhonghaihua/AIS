@@ -50,7 +50,8 @@ public class Master {
 
   public boolean stop() {
     boolean res = true;
-    // TODO 将所有任务都置为失败状态，停止所有线程(可以不停止，外围终端会直接kill掉这个进程),会有一个rpc服务接口调用这个方法
+    // TODO 将所有任务都置为失败状态，master停掉了，executor的线程也会停止，但是task可能还会在运行，这时需要用远程命令去kill
+    // TODO 根据不同的平台，kill的方法不一样
     return res;
   }
 

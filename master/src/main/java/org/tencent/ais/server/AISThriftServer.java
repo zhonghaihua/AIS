@@ -39,6 +39,7 @@ public class AISThriftServer {
       TProcessor tProcessor = new MasterExecutorServiceProtocol.Processor
               <MasterExecutorServiceProtocol.Iface>(new MasterExecutorServiceProtocolImpl());
       TServerSocket tServerSocket = new TServerSocket(server_port);
+      System.out.println(tServerSocket.getServerSocket().getInetAddress());
       TThreadPoolServer.Args tthpsArgs = new TThreadPoolServer.Args(tServerSocket);
       tthpsArgs.processor(tProcessor);
       tthpsArgs.protocolFactory(new TCompactProtocol.Factory());

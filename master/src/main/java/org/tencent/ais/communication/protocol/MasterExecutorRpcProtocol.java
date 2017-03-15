@@ -28,4 +28,6 @@ public interface MasterExecutorRpcProtocol {
   // TODO 更新任务事件类型
   public boolean updateTaskEvent(Event event, String clientIp);
 
+  public boolean sendTaskPidAndExecutorPid(String taskPid, String executorId, String executorPid);
+
 }

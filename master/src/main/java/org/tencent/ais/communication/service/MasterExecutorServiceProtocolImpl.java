@@ -13,6 +13,7 @@ import org.tencent.ais.task.event.Event;
 import org.tencent.ais.task.manager.TaskSetManager;
 import org.tencent.ais.task.scheduler.TaskScheduler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +24,11 @@ public class MasterExecutorServiceProtocolImpl implements MasterExecutorServiceP
 
   @Override
   public TaskMessage launchTaskToRun(String executorId) throws TException {
+    System.out.println("handle now");
     TaskSetManager taskSetManager = TaskSetManager.getTaskSetManagerInstance();
     TaskInfo taskInfo = taskSetManager.getTaskFromPrepareToRun(executorId);
     TaskMessage taskMessage = ConvertUtil.taskInfoToTaskMessage(taskInfo);
+    System.out.println(taskMessage.getAlgoId());
     return taskMessage;
   }
 
@@ -39,12 +42,15 @@ public class MasterExecutorServiceProtocolImpl implements MasterExecutorServiceP
 
   @Override
   public String getTaskStatusByTaskId(String taskId) throws TException {
-    return null;
+    return "zhonghaihua";
   }
 
   @Override
   public List<String> getTaskListByClientIp(String clientIp) throws TException {
-    return null;
+    List<String> list = new ArrayList<>();
+    list.add("aaa");
+    list.add("bbb");
+    return list;
   }
 
   @Override
@@ -55,6 +61,13 @@ public class MasterExecutorServiceProtocolImpl implements MasterExecutorServiceP
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+    return true;
+  }
+
+  @Override
+  public boolean sendTaskPidAndExecutorPid(String taskPid, String executorId, String executorPid) throws TException {
+    ExecutorManager.getInstance().setExecutorIdToTaskPidAndExecutorPid(executorId, taskPid, executorPid);
+    System.out.println("taskPid: " + taskPid + " executorPid: " + executorPid);
     return true;
   }
 

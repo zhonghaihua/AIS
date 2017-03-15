@@ -4,6 +4,7 @@ import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tencent.ais.execute.TaskRunner;
+import org.tencent.ais.monitor.TaskMonitorManager;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.task.TaskInfo;
 import org.tencent.ais.util.SystemInfoUtils;
@@ -23,7 +24,7 @@ public class MPIExecutor extends Executor {
   }
 
   private void init() {
-    isRun = true;
+    TaskMonitorManager.getInstance().setRun(true);
     launchTask();
     executorInfo.setExecutorHostname(executorHostname);
     executorInfo.setExecutorId(executorId);
@@ -35,12 +36,13 @@ public class MPIExecutor extends Executor {
     }
     executorInfo.setTaskId(taskId);
     executorInfo.setLastUpdate(System.currentTimeMillis());
+    run(executorInfo);
   }
 
   @Override
   protected void run(ExecutorInfo executorInfo) {
     this.taskRunner.start();
-    while (isRun) {
+    while (TaskMonitorManager.getInstance().isRun()) {
       resourceInfo.setFreecpu(10);
       resourceInfo.setPlatformFreememory(0);
       resourceInfo.setTotalcpu(10);
@@ -53,6 +55,11 @@ public class MPIExecutor extends Executor {
       }
       executorInfo.setExecutorResourceInfo(resourceInfo);
       reportHeartbeat(executorInfo);
+      try {
+        Thread.sleep(3000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -71,7 +78,7 @@ public class MPIExecutor extends Executor {
     executorInfo.setExecutorId(this.executorId);
     executorInfo.setExecutorHostname(this.executorHostname);
     this.taskInfo = this.mespc.launchTaskToRun(executorInfo);
-    this.taskRunner = new TaskRunner(taskInfo);
+    this.taskRunner = new TaskRunner(taskInfo, executorId);
   }
 
   @Override
@@ -82,18 +89,23 @@ public class MPIExecutor extends Executor {
 
   @Override
   public void killTask() {
+    TaskMonitorManager.getInstance().killTask();
     this.taskRunner.destroy();
   }
 
   @Override
   public void stop() {
     killTask();
-    this.isRun = false;
+    TaskMonitorManager.getInstance().setRun(false);
   }
 
 
   public static void main(String argv[]) throws Exception {
     String executorId = argv[0];
+    String path = System.getProperty("java.library.path");
+    System.out.println(path);
+//    String executorId = "1";
+    System.out.println("start run mpi");
     new MPIExecutor(executorId, SystemInfoUtils.getLocalHostIp());
   }
 }
