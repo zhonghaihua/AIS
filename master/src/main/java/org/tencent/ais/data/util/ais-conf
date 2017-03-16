@@ -1,7 +1,3 @@
-#database.ip 10.198.30.113
-#database.user root
-#database.pass H6fVXyb_82
-
 database.ip 127.0.0.1
 database.user root
 database.pass root
