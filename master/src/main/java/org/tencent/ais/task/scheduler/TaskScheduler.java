@@ -28,6 +28,7 @@ public class TaskScheduler {
   private EventLoop eventProcessLoop = new TaskSchedulerEventProcessLoop(this);
   private int automaticExecutorId = 0;
   private Map<String, String> clientToExecutor = new ConcurrentHashMap<>();
+  private Map<Integer, List<String>> taskToUseMachine = new HashMap<>();
   private static TaskScheduler taskSchedulerInstance = null;
 
   private TaskScheduler(TaskSetManager taskSetManager, TaskDataManager taskDataManager) {
@@ -92,14 +93,23 @@ public class TaskScheduler {
   public void handleRunningTaskToComplete(Event event) {
     TaskInfo taskInfo = event.getTaskInfo();
     TaskData taskData = taskInfo.getTaskData();
+    int taskId;
     taskData.setRate(100);
     taskData.setStatus(2);
     updateTask(taskData);
     if (taskData.getDataType() == 0 ) {
-      log.info("access task is finished, access id is " + taskData.getAccessId());
+      taskId = taskData.getAccessId();
+      log.info("access task is finished, access id is " + taskId);
     } else {
-      log.info("task is finished, task id is " + taskData.getTaskId());
+      taskId = taskData.getTaskId();
+      log.info("task is finished, task id is " + taskId);
     }
+    //释放机器
+    List<String> hasUse = taskToUseMachine.get(taskId);
+    Set<String> hasUseSet = new HashSet<>();
+    hasUseSet.addAll(hasUse);
+    ClientMachineManager.getInstance().freeMachineFormBusy(hasUseSet);
+
     try {
       taskSetManager.setTaskInfoToTaskSetSuccess(taskInfo);
     } catch (InterruptedException e) {
@@ -110,16 +120,24 @@ public class TaskScheduler {
   public void handleRunningTaskToFailed(Event event) {
     TaskInfo taskInfo = event.getTaskInfo();
     TaskData taskData = taskInfo.getTaskData();
+    int taskId;
     if (taskData.getDataType() == 0) {
+      taskId = taskData.getAccessId();
       taskData.setStatus(3);
       updateTask(taskData);
-      log.error("access task is failed, access id is " + taskData.getAccessId());
+      log.error("access task is failed, access id is " + taskId);
     } else {
+      taskId = taskData.getTaskId();
       taskData.setStatus(3);
       taskData.setRate(100);
       updateTask(taskData);
-      log.error("task is failed, task id is " + taskData.getTaskId());
+      log.error("task is failed, task id is " + taskId);
     }
+    //释放机器
+    List<String> hasUse = taskToUseMachine.get(taskId);
+    Set<String> hasUseSet = new HashSet<>();
+    hasUseSet.addAll(hasUse);
+    ClientMachineManager.getInstance().freeMachineFormBusy(hasUseSet);
     try {
       taskSetManager.setTaskInfoToTaskSetFailed(taskInfo);
     } catch (InterruptedException e) {
@@ -140,18 +158,31 @@ public class TaskScheduler {
   public void runTask(TaskInfo taskInfo) throws InterruptedException {
     // 如果是mpi集群，则需要判断是否有资源，如果没有资源则不更新数据库，让它处于待调度状态
     int platformId = taskInfo.getTaskData().getPlatformId();
+    int taskId;
     if (platformId == 3) {
       int need = 3;
       if (taskInfo.getTaskData().getDataType() == 0) {
         need = 1;
+        taskId = taskInfo.getTaskData().getAccessId();
+      } else {
+        taskId = taskInfo.getTaskData().getTaskId();
       }
       Set<String> free = ClientMachineManager.getInstance().getFreeMachline();
       if (free.size() >= need) {
-        ClientMachineManager.getInstance().setMpiClusterBusyMachineSet(free);
+        List<String> freeList = new ArrayList<>();
+        freeList.addAll(free);
+        List<String> use = new ArrayList<>();
+        for (int i = 0; i < need; i++) {
+          use.add(freeList.get(i));
+        }
+        Set<String> useSet = new HashSet<>();
+        useSet.addAll(use);
+        ClientMachineManager.getInstance().setMpiClusterBusyMachineSet(useSet);
         // TODO 把空闲的机器列表发到executor端
-        List<String> list = new ArrayList<>();
-        list.addAll(free);
-        taskInfo.setMachineList(list);
+        List<String> hasUse = new ArrayList<>();
+        hasUse.addAll(use);
+        taskToUseMachine.put(taskId, hasUse);
+        taskInfo.setMachineList(use);
         taskInfo.getTaskData().setStatus(1);
         UpdateTaskEvent updateTaskEvent = new UpdateTaskEvent(taskInfo);
         eventProcessLoop.post(updateTaskEvent);

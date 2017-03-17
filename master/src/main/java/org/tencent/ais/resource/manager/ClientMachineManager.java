@@ -77,8 +77,12 @@ public class ClientMachineManager {
     }
   }
 
-  public void setMpiClusterBusyMachineSet(Set<String> list) {
+  public synchronized void setMpiClusterBusyMachineSet(Set<String> list) {
     mpiClusterBusyMachineSet.addAll(list);
+  }
+
+  public synchronized void freeMachineFormBusy(Set<String> list) {
+    mpiClusterBusyMachineSet.removeAll(list);
   }
 
   public Set<String> getMpiClusterBusyMachineSet() {
