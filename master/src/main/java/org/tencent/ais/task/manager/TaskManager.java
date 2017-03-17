@@ -30,7 +30,8 @@ public class TaskManager {
       while (CommonConf.running) {
         System.out.println("begin get task data");
         try {
-          List<TaskData> taskDataList = taskDataManager.getTaskByPlatformIdFromDB(0, 0, false);
+          // 暂时只获取mpi集群的
+          List<TaskData> taskDataList = taskDataManager.getTaskByPlatformIdFromDB(3, 0, true);
           for (TaskData taskData : taskDataList) {
             String taskClientIp = ClientMachineManager.getInstance().getMachineToPlatformByRandom(taskData.getPlatformId());
             TaskInfo taskInfo = taskDataWrapToTaskInfo(taskData, taskClientIp);

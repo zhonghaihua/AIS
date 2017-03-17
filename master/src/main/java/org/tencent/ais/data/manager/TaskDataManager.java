@@ -47,10 +47,10 @@ public class TaskDataManager {
                                                   boolean useConditionOfPlatform) throws Exception{
     String sql;
     if (useConditionOfPlatform) {
-      sql = "select * from task_access_test_iward where platform_id = " +
+      sql = "select * from task_access_test where platform_id = " +
               platformId + " and status = " + status;
     } else {
-      sql = "select * from task_access_test_iward where status = " + status;
+      sql = "select * from task_access_test where status = " + status;
     }
 
     TaskData taskData = null;
@@ -139,7 +139,7 @@ public class TaskDataManager {
 
   public boolean updateTaskStatusByTaskId(int taskId, int status, int rate,
                                           String errmsg, String startTime, String endTime) {
-    String sql = "update task_access_test_iward set status = " + status + ", rate = " + rate +
+    String sql = "update task_access_test set status = " + status + ", rate = " + rate +
             ", err_msg = " + errmsg + ", start_time = '" + startTime + "', end_time = '" +
             endTime + "' where task_id = " + taskId;
     System.out.println(sql);

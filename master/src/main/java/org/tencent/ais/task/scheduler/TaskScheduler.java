@@ -13,8 +13,7 @@ import org.tencent.ais.task.event.RunTaskEvent;
 import org.tencent.ais.task.event.UpdateTaskEvent;
 import org.tencent.ais.task.manager.TaskSetManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -139,11 +138,41 @@ public class TaskScheduler {
    * @param taskInfo
    */
   public void runTask(TaskInfo taskInfo) throws InterruptedException {
-    taskInfo.getTaskData().setStatus(1);
-    UpdateTaskEvent updateTaskEvent = new UpdateTaskEvent(taskInfo);
-    eventProcessLoop.post(updateTaskEvent);
-    RunTaskEvent runTaskEvent = new RunTaskEvent(taskInfo);
-    eventProcessLoop.post(runTaskEvent);
+    // 如果是mpi集群，则需要判断是否有资源，如果没有资源则不更新数据库，让它处于待调度状态
+    int platformId = taskInfo.getTaskData().getPlatformId();
+    if (platformId == 3) {
+      int need = 3;
+      if (taskInfo.getTaskData().getDataType() == 0) {
+        need = 1;
+      }
+      Set<String> free = ClientMachineManager.getInstance().getFreeMachline();
+      if (free.size() >= need) {
+        ClientMachineManager.getInstance().setMpiClusterBusyMachineSet(free);
+        // TODO 把空闲的机器列表发到executor端
+        List<String> list = new ArrayList<>();
+        list.addAll(free);
+        taskInfo.setMachineList(list);
+        taskInfo.getTaskData().setStatus(1);
+        UpdateTaskEvent updateTaskEvent = new UpdateTaskEvent(taskInfo);
+        eventProcessLoop.post(updateTaskEvent);
+        RunTaskEvent runTaskEvent = new RunTaskEvent(taskInfo);
+        eventProcessLoop.post(runTaskEvent);
+      } else {
+        if (taskInfo.getTaskData().getDataType() == 0) {
+          System.out.println("Access Task: " + taskInfo.getTaskData().getAccessId() + " is wait for schedule, because no machine");
+        } else {
+          System.out.println("Task: " + taskInfo.getTaskData().getTaskId() + " is wait for schedule, because no machine");
+        }
+      }
+    } else {
+      taskInfo.getTaskData().setStatus(1);
+      UpdateTaskEvent updateTaskEvent = new UpdateTaskEvent(taskInfo);
+      eventProcessLoop.post(updateTaskEvent);
+      RunTaskEvent runTaskEvent = new RunTaskEvent(taskInfo);
+      eventProcessLoop.post(runTaskEvent);
+    }
+
+
   }
 
   private boolean updateTask(TaskData taskData) {

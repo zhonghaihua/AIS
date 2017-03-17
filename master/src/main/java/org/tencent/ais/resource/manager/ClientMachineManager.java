@@ -8,6 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClientMachineManager {
   private Map<Integer, List<String>> platformToClientMachineList = new HashMap<>();
+  private Set<String> mpiClusterTotalMachineSet = new HashSet<>();
+  private Set<String> mpiClusterBusyMachineSet = new HashSet<>();
   private final ReentrantLock putLock = new ReentrantLock();
   private static ClientMachineManager clientMachineManagerInstance = null;
 
@@ -73,8 +75,25 @@ public class ClientMachineManager {
     } finally {
       this.putLock.unlock();
     }
+  }
 
+  public void setMpiClusterBusyMachineSet(Set<String> list) {
+    mpiClusterBusyMachineSet.addAll(list);
+  }
 
+  public Set<String> getMpiClusterBusyMachineSet() {
+    return mpiClusterBusyMachineSet;
+  }
+
+  public Set<String> getMpiClusterTotalMachineSet() {
+    return mpiClusterTotalMachineSet;
+  }
+
+  public Set<String> getFreeMachline() {
+    Set<String> freeSet = new HashSet<>();
+    freeSet.addAll(mpiClusterTotalMachineSet);
+    freeSet.removeAll(mpiClusterBusyMachineSet);
+    return freeSet;
   }
 
   public void initialize() {
@@ -84,7 +103,9 @@ public class ClientMachineManager {
     machineList.add("10.151.15.155");
     updatePlatformToClientMachineList(5, machineList);
     updatePlatformToClientMachineList(3, machineList);
-
+    mpiClusterTotalMachineSet.add("10.51.212.42");
+    mpiClusterTotalMachineSet.add("10.51.212.43");
+    mpiClusterTotalMachineSet.add("10.51.212.44");
   }
 
 

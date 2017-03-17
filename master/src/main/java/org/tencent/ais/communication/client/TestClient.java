@@ -5,6 +5,8 @@ import org.tencent.ais.executor.ExecutorInfo;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.util.SystemInfoUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +38,24 @@ public class TestClient {
   @Test
   public void testGetIp() {
     System.out.println(SystemInfoUtils.getLocalHostIp());
+  }
+
+  @Test
+  public void testgen() {
+    List<String> machinelist = new ArrayList<>();
+    machinelist.add("10.10.11.11");
+    machinelist.add("10.121.21.1");
+    machinelist.add("12.231.31.1");
+    String machinestr = "";
+    for (String machine: machinelist) {
+      machinestr = machinestr + machine + "\\n";
+    }
+    System.out.println(machinestr);
+    System.out.println(machinestr.substring(0, machinestr.length()-2));
+
+    String workdir = "/data/workdir/data_tmp/" + "1" + "/" + "1212";
+    String genMachineFilecmd = "echo -e '" + machinestr + "' > " + workdir + "/machineFile";
+    System.out.println(genMachineFilecmd);
   }
 
 }

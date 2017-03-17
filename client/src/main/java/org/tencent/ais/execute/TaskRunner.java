@@ -11,6 +11,7 @@ import org.tencent.ais.util.SystemInfoUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +34,7 @@ public class TaskRunner extends Thread {
     Map<String, String> cmdres = prepareCommand(taskType);
     String precmd = cmdres.get("precmd");
     String runcmd = cmdres.get("runcmd");
+    String genMachineFilecmd = cmdres.get("genMachineFilecmd");
     System.out.println("cmd1: " + precmd);
     System.out.println("cmd2: " + runcmd);
     log.info("cmd1: " + precmd);
@@ -40,6 +42,7 @@ public class TaskRunner extends Thread {
     String pid = null;
     try {
       AISUtils.execuShellCmd(precmd);
+      AISUtils.execuShellCmd(genMachineFilecmd);
       System.out.println("executor runtask");
       pid = AISUtils.asynExecuShellCmd(runcmd);
     } catch (IOException e) {
@@ -66,9 +69,16 @@ public class TaskRunner extends Thread {
     String input_path = taskData.getInputPath();
     String output_path = taskData.getOutputPath();
     String parameter_path = taskData.getParameterPath();
+    List<String> machinelist = taskInfo.getMachineList();
+    String machinestr = "";
+    for (String machine: machinelist) {
+      machinestr = machinestr + machine + "\\n";
+    }
+    machinestr = machinestr.substring(0, machinestr.length()-2);
     int task_type = taskData.getTaskType();
     String workdir = "/data/workdir/data_tmp/" + executorId + "/" + taskId;
     String precmd = "mkdir -p " + workdir + "; cp " + package_path + " " + workdir + " && cd " + workdir + " && tar -xf " + package_name;
+    String genMachineFilecmd = "echo -e '" + machinestr + "' > " + workdir + "/machineFile";
     String runcmd = "cd " + workdir + " && nohup ./submit_run.sh " + package_path + " " +
             input_path + " " + output_path + " " + parameter_path + " " + taskId + " " +
             task_type + " > " + taskId + ".log 2>&1 &";
@@ -76,6 +86,7 @@ public class TaskRunner extends Thread {
     cmdMap.put("precmd", precmd);
     cmdMap.put("runcmd", runcmd);
     cmdMap.put("workdir", workdir);
+    cmdMap.put("genMachineFilecmd", genMachineFilecmd);
 
     return cmdMap;
   }

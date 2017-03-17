@@ -47,6 +47,7 @@ public class ConvertUtil {
     taskMessage.setAccessStatus(taskData.getAccessStatus());
     taskMessage.setAccessProgress(taskData.getAccessProgress());
     taskMessage.setAlgoDescription(taskData.getAlgoDescription());
+    taskMessage.setMpimachineList(taskInfo.getMachineList());
 
     return taskMessage;
   }
@@ -80,6 +81,7 @@ public class ConvertUtil {
     taskData.setAccessProgress(taskMessage.getAccessProgress());
     taskData.setAlgoDescription(taskMessage.getAlgoDescription());
 
+    taskInfo.setMachineList(taskMessage.getMpimachineList());
     taskInfo.setPlatform(taskData.getPlatformId());
     taskInfo.setTaskClientIp(executorHostname);
     taskInfo.setTaskData(taskData);
