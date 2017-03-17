@@ -13,6 +13,10 @@ import org.tencent.ais.task.event.RunTaskEvent;
 import org.tencent.ais.task.event.UpdateTaskEvent;
 import org.tencent.ais.task.manager.TaskSetManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * Created by iwardzhong on 2017/2/22.
@@ -24,6 +28,7 @@ public class TaskScheduler {
   private TaskDataManager taskDataManager;
   private EventLoop eventProcessLoop = new TaskSchedulerEventProcessLoop(this);
   private int automaticExecutorId = 0;
+  private Map<String, String> clientToExecutor = new ConcurrentHashMap<>();
   private static TaskScheduler taskSchedulerInstance = null;
 
   private TaskScheduler(TaskSetManager taskSetManager, TaskDataManager taskDataManager) {
@@ -51,19 +56,30 @@ public class TaskScheduler {
 
   public void handleTaskToRun(Event event) {
     System.out.println("start to handle");
-    String executorId = String.valueOf(getAutomaticExecutorId());
     int platformId = event.getTaskInfo().getPlatform();
     System.out.println(platformId);
     String executorHostname = ClientMachineManager.getInstance().getMachineToPlatformByRandom(platformId);
     System.out.println(executorHostname);
     System.out.println("hello");
-    //Executor executor = getExecutor(platformId, executorId, executorHostname, event.getTaskInfo());
-    // TODO 创建一个ExecutorRunner，然后传入参数去远程启动一个exeuctor
-    new ExecutorRunner(executorId, String.valueOf(platformId), executorHostname).startExecutor();
-    ExecutorManager.getInstance().addExecutorIdToIp(executorId, executorHostname);
+    String executorId;
+    if (clientToExecutor.keySet().contains(executorHostname)) {
+      executorId = clientToExecutor.get(executorHostname);
+    } else {
+      executorId = String.valueOf(getAutomaticExecutorId());
+    }
     ExecutorManager.getInstance().setExecutorIdToTaskInfo(executorId, event.getTaskInfo());
-    ExecutorManager.getInstance().setExecutorLastseen(executorId, System.currentTimeMillis());
     taskSetManager.setTaskToPrepareToRun(executorId, event.getTaskInfo()); // Executor启动完成后会从这个集合主动拉取
+    // TODO 创建一个ExecutorRunner，然后传入参数去远程启动一个exeuctor, 如果远程存在进程就直接launchTask
+    if (clientToExecutor.keySet().contains(executorHostname)) {
+      // 通知executor launch the task,在下次心跳过来时通知
+      ExecutorManager.getInstance().setExecutorLaunchTaskInHeartbeat(executorId);
+    } else {
+      new ExecutorRunner(executorId, String.valueOf(platformId), executorHostname).startExecutor();
+      clientToExecutor.put(executorHostname, executorId);
+      ExecutorManager.getInstance().addExecutorIdToIp(executorId, executorHostname);
+      ExecutorManager.getInstance().setExecutorLastseen(executorId, System.currentTimeMillis());
+    }
+
     System.out.println("event runing" + event.getTaskInfo().getTaskData().getAlgoId());
     if (event.getTaskInfo().getTaskData().getDataType() == 0) {
       log.info("Access task: " + event.getTaskInfo().getTaskData().getAccessId() +

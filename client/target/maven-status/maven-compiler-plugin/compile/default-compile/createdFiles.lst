@@ -5,5 +5,6 @@ org\tencent\ais\executor\MPIExecutor.class
 org\tencent\ais\execute\TaskRunner.class
 org\tencent\ais\monitor\TaskMonitorManager$1.class
 org\tencent\ais\monitor\TaskMonitorManager.class
+org\tencent\ais\executor\Executor$1.class
 org\tencent\ais\executor\XgboostExecutor.class
 org\tencent\ais\executor\Executor.class

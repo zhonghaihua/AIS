@@ -47,9 +47,10 @@ public class TaskRunner extends Thread {
     }
     TaskMonitorManager.getInstance().setTaskPid(pid);
     TaskMonitorManager.getInstance().sendTaskPidAndExecutorPid();
-    TaskMonitorManager.getInstance().setOutput_path(taskData.getOutputPath());
     TaskMonitorManager.getInstance().setTaskInfo(taskInfo);
-    TaskMonitorManager.getInstance().startTaskMoniterThread();
+    if (!TaskMonitorManager.getInstance().threadIsAlive()) {
+      TaskMonitorManager.getInstance().startTaskMoniterThread();
+    }
   }
 
   private Map<String, String> prepareCommand(int taskType) {

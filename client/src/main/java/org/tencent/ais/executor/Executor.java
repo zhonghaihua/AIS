@@ -8,6 +8,10 @@ import org.tencent.ais.task.TaskInfo;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by iwardzhong on 2017/2/28.
@@ -16,10 +20,26 @@ public abstract class Executor {
   protected MasterExecutorServiceProtocolClient mespc = new MasterExecutorServiceProtocolClient();
   protected String executorId;
   protected String executorHostname;
-  protected TaskInfo taskInfo;
-  protected TaskRunner taskRunner;
-  protected ExecutorInfo executorInfo = new ExecutorInfo();
+  protected Map<Integer, TaskInfo> taskInfo = new HashMap<>();
+  protected LinkedBlockingQueue<TaskRunner> taskRunnerQueue = new LinkedBlockingQueue<>();
   protected ResourceInfo resourceInfo = new ResourceInfo();
+  protected ExecutorInfo executorInfo = new ExecutorInfo();
+  public static volatile boolean stop = false;
+  private Thread taskQueue = new Thread(new Runnable() {
+    @Override
+    public void run() {
+      System.out.println("strat handle task queue");
+      while (!stop) {
+        try {
+          TaskRunner taskRunner = taskRunnerQueue.take();
+          taskRunner.start();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      System.out.println("task queue handle finished");
+    }
+  });
 
   public Executor(String executorId, String hostname) {
     this.executorId = executorId;
@@ -27,6 +47,7 @@ public abstract class Executor {
     TaskMonitorManager.getInstance().setExecutorId(executorId);
     TaskMonitorManager.getInstance().setCurrenProcessPid(getCurrentProcessID());
     TaskMonitorManager.getInstance().setMespc(mespc);
+    TaskMonitorManager.getInstance().setTaskRunnerQueue(taskRunnerQueue);
   }
 
   public String getExecutorId() {
@@ -45,12 +66,21 @@ public abstract class Executor {
     this.executorHostname = executorHostname;
   }
 
-  public TaskInfo getTaskInfo() {
-    return taskInfo;
+  public TaskInfo getTaskInfo(int taskId) {
+    return taskInfo.get(taskId);
   }
 
-  public void setTaskInfo(TaskInfo taskInfo) {
-    this.taskInfo = taskInfo;
+  public void startTaskQueue() {
+    taskQueue.start();
+  }
+
+  public void stopTaskQueue() {
+    stop = true;
+    taskQueue.stop();
+  }
+
+  public void setTaskInfo(int taskId, TaskInfo taskInfo) {
+    this.taskInfo.put(taskId, taskInfo);
   }
 
   protected abstract void run(ExecutorInfo executorInfo);

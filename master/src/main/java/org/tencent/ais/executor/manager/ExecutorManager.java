@@ -11,7 +11,9 @@ import org.tencent.ais.task.event.Event;
 import org.tencent.ais.task.event.FailedTaskEvent;
 import org.tencent.ais.task.scheduler.TaskScheduler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,10 +27,11 @@ public class ExecutorManager {
   private Map<String, Long> executorLastseen = new HashMap<>();
   private Map<String, String> executorIdToIp = new HashMap<>();
   private Map<String, ResourceInfo> clientResource = new ConcurrentHashMap<>();
-  private Map<String, TaskInfo> executorIdToTaskInfo = new HashMap<>();
+  private Map<String, List<TaskInfo>> executorIdToTaskInfo = new HashMap<>();
   private Map<String, Process> executorIdToProcess = new HashMap<>();
   private Map<String, String> executorIdToTaskPid = new HashMap<>();
   private Map<String, String> executorIdToPid = new HashMap<>();
+  private Map<String, Integer> executorLaunchTaskInHeartbeat = new ConcurrentHashMap<>();
 
   // 主要针对客户端一直Executor卡住的情况，其余心跳超时都是发送kill命令去kill
   private Thread checkExecutorHeartbeat = new Thread(new Runnable() {
@@ -75,7 +78,14 @@ public class ExecutorManager {
       log.warn("Executor: " + executorInfo.getExecutorId() + "is heartbeat timeout, send kill command to executor.");
       res.put("cmd", "kill");
     } else {
-      res.put("cmd", "run");
+      if (executorLaunchTaskInHeartbeat.containsKey(executorInfo.getExecutorId()) &&
+              executorLaunchTaskInHeartbeat.get(executorInfo.getExecutorId()) > 0) {
+        decreaseExecutorLaunchTaskInHeartbeat(executorInfo.getExecutorId());
+        res.put("cmd", "launch");
+        System.out.println("Executor: " + executorInfo.getExecutorId() + " launch another task");
+      } else {
+        res.put("cmd", "run");
+      }
     }
     String updateTime = String.valueOf(executorLastseen.get(executorInfo.getExecutorId()));
     res.put(executorInfo.getExecutorId(), updateTime);
@@ -102,11 +112,13 @@ public class ExecutorManager {
     Process process = executorIdToProcess.get(executorId);
     process.destroy();
     // 将这个executor的任务的状态全部修改为失败状态
-    Event event = new FailedTaskEvent(executorIdToTaskInfo.get(executorId));
-    try {
-      TaskScheduler.getTaskSchedulerInstance().getEventProcessLoop().post(event);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    for (TaskInfo taskInfo : executorIdToTaskInfo.get(executorId)) {
+      Event event = new FailedTaskEvent(taskInfo);
+      try {
+        TaskScheduler.getTaskSchedulerInstance().getEventProcessLoop().post(event);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 
@@ -115,7 +127,15 @@ public class ExecutorManager {
   }
 
   public void setExecutorIdToTaskInfo(String executorId, TaskInfo taskInfo) {
-    executorIdToTaskInfo.put(executorId, taskInfo);
+    if (executorIdToTaskInfo.keySet().contains(executorId)) {
+      List<TaskInfo> list = executorIdToTaskInfo.get(executorId);
+      list.add(taskInfo);
+      executorIdToTaskInfo.put(executorId, list);
+    } else {
+      List<TaskInfo> list = new ArrayList<>();
+      list.add(taskInfo);
+      executorIdToTaskInfo.put(executorId, list);
+    }
   }
 
   public void setExecutorLastseen(String executorId, Long firstTime) {
@@ -124,6 +144,21 @@ public class ExecutorManager {
 
   public void setExecutorIdToProcess(String executorId, Process process) {
     executorIdToProcess.put(executorId, process);
+  }
+
+  public synchronized void setExecutorLaunchTaskInHeartbeat(String executorId) {
+    int count = 0;
+    if (executorLaunchTaskInHeartbeat.containsKey(executorId)) {
+      count = executorLaunchTaskInHeartbeat.get(executorId) + 1;
+    } else {
+      count += 1;
+    }
+    executorLaunchTaskInHeartbeat.put(executorId, count);
+  }
+
+  public synchronized void decreaseExecutorLaunchTaskInHeartbeat(String executorId) {
+    int count = executorLaunchTaskInHeartbeat.get(executorId) - 1;
+    executorLaunchTaskInHeartbeat.put(executorId, count);
   }
 
   public void setExecutorIdToTaskPidAndExecutorPid(String executorId, String taskPid, String executorPid) {

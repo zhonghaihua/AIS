@@ -9,6 +9,7 @@ import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.task.TaskInfo;
 import org.tencent.ais.util.SystemInfoUtils;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -25,23 +26,16 @@ public class MPIExecutor extends Executor {
 
   private void init() {
     TaskMonitorManager.getInstance().setRun(true);
-    launchTask();
     executorInfo.setExecutorHostname(executorHostname);
     executorInfo.setExecutorId(executorId);
-    String taskId;
-    if (taskInfo.getTaskData().getDataType() == 0) {
-      taskId = String.valueOf(taskInfo.taskData.getAccessId());
-    } else {
-      taskId = String.valueOf(taskInfo.taskData.getTaskId());
-    }
-    executorInfo.setTaskId(taskId);
     executorInfo.setLastUpdate(System.currentTimeMillis());
+    launchTask();
     run(executorInfo);
   }
 
   @Override
   protected void run(ExecutorInfo executorInfo) {
-    this.taskRunner.start();
+    startTaskQueue();
     while (TaskMonitorManager.getInstance().isRun()) {
       resourceInfo.setFreecpu(10);
       resourceInfo.setPlatformFreememory(0);
@@ -61,24 +55,38 @@ public class MPIExecutor extends Executor {
         e.printStackTrace();
       }
     }
+    stopTaskQueue();
   }
 
   private void handleHeartbeatResponse(Map<String, String> res) {
     String cmd = res.get("cmd");
+    System.out.println("heartbeat response: " + cmd);
     if (cmd.equals("kill")) {
       stop();
     } else if (cmd.equals("run")) {
       executorInfo.setLastUpdate(Long.parseLong(res.get(executorId)));
+    } else if (cmd.equals("launch")) {
+      System.out.println("other task run in same executor");
+      executorInfo.setLastUpdate(Long.parseLong(res.get(executorId)));
+      launchTask();
     }
   }
 
   @Override
   public void launchTask() {
-    ExecutorInfo executorInfo = new ExecutorInfo();
-    executorInfo.setExecutorId(this.executorId);
-    executorInfo.setExecutorHostname(this.executorHostname);
-    this.taskInfo = this.mespc.launchTaskToRun(executorInfo);
-    this.taskRunner = new TaskRunner(taskInfo, executorId);
+    TaskInfo task = this.mespc.launchTaskToRun(executorInfo);
+    int taskId;
+    if (task.getTaskData().getDataType() == 0) {
+      taskId = task.getTaskData().getAccessId();
+    } else {
+      taskId = task.getTaskData().getTaskId();
+    }
+    this.taskInfo.put(taskId, task);
+    try {
+      this.taskRunnerQueue.put(new TaskRunner(task, executorId));
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -90,7 +98,11 @@ public class MPIExecutor extends Executor {
   @Override
   public void killTask() {
     TaskMonitorManager.getInstance().killTask();
-    this.taskRunner.destroy();
+    Iterator<TaskRunner> it = this.taskRunnerQueue.iterator();
+    while (it.hasNext()) {
+      TaskRunner tr = it.next();
+      tr.destroy();
+    }
   }
 
   @Override
@@ -107,5 +119,7 @@ public class MPIExecutor extends Executor {
 //    String executorId = "1";
     System.out.println("start run mpi");
     new MPIExecutor(executorId, SystemInfoUtils.getLocalHostIp());
+    stop = true;
+    System.out.println("end");
   }
 }

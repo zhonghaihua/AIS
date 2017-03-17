@@ -15,7 +15,7 @@ public class TaskSetManager {
   private LinkedBlockingQueue<TaskInfo> taskSetToRunn = new LinkedBlockingQueue<>();
   private LinkedBlockingQueue<TaskInfo> taskSetSuccess = new LinkedBlockingQueue<>();
   private LinkedBlockingQueue<TaskInfo> taskSetFailed = new LinkedBlockingQueue<>();
-  private Map<String, TaskInfo> prepareToRun = new HashMap<>();
+  private Map<String, LinkedBlockingQueue<TaskInfo>> prepareToRun = new HashMap<>();
   private static TaskSetManager taskSetManagerInstance = null;
 
   private TaskSetManager() {}
@@ -61,11 +61,27 @@ public class TaskSetManager {
   }
 
   public synchronized void setTaskToPrepareToRun(String executorId, TaskInfo taskInfo) {
-    prepareToRun.put(executorId, taskInfo);
+    try {
+      if (prepareToRun.keySet().contains(executorId)) {
+        prepareToRun.get(executorId).put(taskInfo);
+      } else {
+        LinkedBlockingQueue<TaskInfo> queue = new LinkedBlockingQueue<>();
+        queue.put(taskInfo);
+        prepareToRun.put(executorId, queue);
+      }
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
   }
 
   public synchronized TaskInfo getTaskFromPrepareToRun(String executorId) {
-    return prepareToRun.get(executorId);
+    try {
+      return prepareToRun.get(executorId).take();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
 
