@@ -1,10 +1,13 @@
 package org.tencent.ais.communication.client;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.tencent.ais.executor.ExecutorInfo;
 import org.tencent.ais.resource.ResourceInfo;
 import org.tencent.ais.util.SystemInfoUtils;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,19 @@ public class TestClient {
     String workdir = "/data/workdir/data_tmp/" + "1" + "/" + "1212";
     String genMachineFilecmd = "echo -e '" + machinestr + "' > " + workdir + "/machineFile";
     System.out.println(genMachineFilecmd);
+  }
+
+  @Test
+  public void testGetList() {
+    List<String> mpilist = new ArrayList<>();
+    String path = "D:\\github_project\\myHadoop\\AIS\\master\\src\\main\\java\\org\\tencent\\ais\\data\\util\\mpiClusterList";
+    try {
+      InputStream input = new FileInputStream(path);
+      mpilist = IOUtils.readLines(input);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    System.out.println(mpilist.size());
   }
 
 }

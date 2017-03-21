@@ -1,13 +1,10 @@
 package org.tencent.ais.data.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.apache.commons.io.IOUtils;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by iwardzhong on 2017/2/20.
@@ -25,6 +22,32 @@ public class ConfUtils {
     String dir = getEnv("AIS_CONF_DIR");
     System.out.println("dir: " + dir);
     return dir;
+  }
+
+  public static List<String> getMpiClusterList() {
+    List<String> mpilist = new ArrayList<>();
+    String confdir = getConfDir();
+    String path = confdir + "/mpiClusterList";
+    try {
+      InputStream input = new FileInputStream(path);
+      mpilist = IOUtils.readLines(input);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mpilist;
+  }
+
+  public static List<String> getMpiClientList() {
+    List<String> mpilist = new ArrayList<>();
+    String confdir = getConfDir();
+    String path = confdir + "/mpiClientList";
+    try {
+      InputStream input = new FileInputStream(path);
+      mpilist = IOUtils.readLines(input);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mpilist;
   }
 
   private static Properties loadProperties() throws IOException {

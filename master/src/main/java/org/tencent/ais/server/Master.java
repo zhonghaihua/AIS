@@ -52,6 +52,10 @@ public class Master {
     boolean res = true;
     // TODO 将所有任务都置为失败状态，master停掉了，executor的线程也会停止，但是task可能还会在运行，这时需要用远程命令去kill
     // TODO 根据不同的平台，kill的方法不一样
+    taskScheduler.getEventProcessLoop().stop();
+    server.stop();
+    taskScheduler.killAllExecutor();
+    CommonConf.running = false;
     return res;
   }
 

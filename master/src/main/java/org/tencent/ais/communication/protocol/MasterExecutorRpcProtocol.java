@@ -30,4 +30,6 @@ public interface MasterExecutorRpcProtocol {
 
   public boolean sendTaskPidAndExecutorPid(String taskPid, String executorId, String executorPid);
 
+  public boolean executorRelease(String executorId, String clientIp);
+
 }

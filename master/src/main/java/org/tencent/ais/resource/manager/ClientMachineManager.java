@@ -1,5 +1,7 @@
 package org.tencent.ais.resource.manager;
 
+import org.tencent.ais.data.util.ConfUtils;
+
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -102,14 +104,16 @@ public class ClientMachineManager {
 
   public void initialize() {
     List<String> machineList = new ArrayList<>();
-    machineList.add("10.151.15.155");
-    machineList.add("10.151.15.155");
-    machineList.add("10.151.15.155");
-    updatePlatformToClientMachineList(5, machineList);
+//    machineList.add("10.151.15.155");
+//    machineList.add("10.151.15.155");
+//    machineList.add("10.151.15.155");
+    machineList.addAll(ConfUtils.getMpiClientList());
+//    updatePlatformToClientMachineList(5, machineList);
     updatePlatformToClientMachineList(3, machineList);
-    mpiClusterTotalMachineSet.add("10.51.212.42");
-    mpiClusterTotalMachineSet.add("10.51.212.43");
-    mpiClusterTotalMachineSet.add("10.51.212.44");
+    mpiClusterTotalMachineSet.addAll(ConfUtils.getMpiClusterList());
+//    mpiClusterTotalMachineSet.add("10.51.212.42");
+//    mpiClusterTotalMachineSet.add("10.51.212.43");
+//    mpiClusterTotalMachineSet.add("10.51.212.44");
   }
 
 

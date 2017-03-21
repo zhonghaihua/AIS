@@ -121,4 +121,20 @@ public class MasterExecutorServiceProtocolClient implements MasterExecutorRpcPro
     return res;
   }
 
+  @Override
+  public boolean executorRelease(String executorId, String clientIp) {
+    boolean res = false;
+    try {
+      masterExecutorServiceProtocolTransport.open();
+      res = masterExecutorServiceProtocolClient.executorRelease(executorId, clientIp);
+    } catch (TException e) {
+      e.printStackTrace();
+    } finally {
+      if (masterExecutorServiceProtocolTransport != null) {
+        masterExecutorServiceProtocolTransport.close();
+      }
+    }
+    return res;
+  }
+
 }

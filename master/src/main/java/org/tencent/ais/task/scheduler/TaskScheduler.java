@@ -12,7 +12,9 @@ import org.tencent.ais.task.event.Event;
 import org.tencent.ais.task.event.RunTaskEvent;
 import org.tencent.ais.task.event.UpdateTaskEvent;
 import org.tencent.ais.task.manager.TaskSetManager;
+import org.tencent.ais.util.AISUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -115,6 +117,10 @@ public class TaskScheduler {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    // 从executorToTaskinfo集合中移除这信息
+    String executorId = clientToExecutor.get(taskInfo.getTaskClientIp());
+    ExecutorManager.getInstance().removeExecutorIdTaskInfo(executorId, taskInfo);
   }
 
   public void handleRunningTaskToFailed(Event event) {
@@ -143,6 +149,10 @@ public class TaskScheduler {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    // 从executorToTaskinfo集合中移除这信息
+    String executorId = clientToExecutor.get(taskInfo.getTaskClientIp());
+    ExecutorManager.getInstance().removeExecutorIdTaskInfo(executorId, taskInfo);
   }
 
   public void handleUpdateTaskInfo(Event event) {
@@ -202,8 +212,6 @@ public class TaskScheduler {
       RunTaskEvent runTaskEvent = new RunTaskEvent(taskInfo);
       eventProcessLoop.post(runTaskEvent);
     }
-
-
   }
 
   private boolean updateTask(TaskData taskData) {
@@ -236,20 +244,35 @@ public class TaskScheduler {
     return automaticExecutorId;
   }
 
+  public void releaseExecutorFromClient(String executorId, String clientIP) {
+    if (clientToExecutor.keySet().contains(clientIP)) {
+      if (clientToExecutor.get(clientIP).equals(executorId)) {
+        clientToExecutor.remove(clientIP);
+      }
+    }
+  }
+
+  public void killAllTask() {
+    ExecutorManager.getInstance().killAllTask();
+  }
+
+  public void killAllExecutor() {
+    for (String clientIp : clientToExecutor.keySet()) {
+      String executorId = clientToExecutor.get(clientIp);
+      ExecutorManager.getInstance().killExecutor(executorId, clientIp);
+    }
+  }
+
+  public void killExecutor(String clientIp, String exeuctorId) {
+    if (clientToExecutor.containsKey(clientIp)) {
+      clientToExecutor.remove(clientIp);
+    }
+  }
+
   public EventLoop getEventProcessLoop() {
     return eventProcessLoop;
   }
 
-//  private Executor getExecutor(int platformId, String executorId, String executorHostname, TaskInfo taskInfo) {
-//    if (platformId == 1) {
-//      return new TFExecutor(executorId, executorHostname);
-//    } else if (platformId == 2) {
-//      return new XgboostExecutor(executorId, executorHostname);
-//    } else if (platformId == 3) {
-//      return new MPIExecutor(executorId, executorHostname);
-//    } else {
-//      return new SparkExecutor(executorId, executorHostname);
-//    }
-//  }
+
 
 }

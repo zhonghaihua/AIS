@@ -15,6 +15,7 @@ org\tencent\ais\communication\protocol\TaskEvent$TaskEventTupleSchemeFactory.cla
 org\tencent\ais\communication\protocol\ResourceMessage$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_result$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_args.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args$executorRelease_argsStandardSchemeFactory.class
 org\tencent\ais\task\manager\TaskManager$3.class
 org\tencent\ais\executor\ExecutorInfo.class
 org\tencent\ais\executor\manager\ExecutorManager$1.class
@@ -37,6 +38,7 @@ org\tencent\ais\communication\protocol\ResourceMessage.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result$updateTaskEvent_resultStandardSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Processor.class
 org\tencent\ais\server\AISThriftServer.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result$executorRelease_resultTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_result$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorRpcProtocol.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_args$reportHeartbeat_argsStandardScheme.class
@@ -62,11 +64,14 @@ org\tencent\ais\communication\protocol\ResourceMessage$ResourceMessageStandardSc
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskListByClientIp_result$_Fields.class
 org\tencent\ais\task\event\FailedTaskEvent.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_result$sendTaskPidAndExecutorPid_resultTupleSchemeFactory.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result$_Fields.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result$executorRelease_resultTupleScheme.class
 org\tencent\ais\data\util\ConfUtils.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_args$reportHeartbeat_argsTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor.class
 org\tencent\ais\data\util\Test2.class
 org\tencent\ais\communication\protocol\ExecutorMessage$1.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result$executorRelease_resultStandardScheme.class
 org\tencent\ais\task\scheduler\TaskSchedulerEventProcessLoop.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_result.class
 org\tencent\ais\task\manager\TaskSetManager.class
@@ -80,6 +85,7 @@ org\tencent\ais\communication\protocol\TaskEvent.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_args$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_args$sendTaskPidAndExecutorPid_argsTupleScheme.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor$reportHeartbeat.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$getTaskListByClientIp_call.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol.class
 org\tencent\ais\data\manager\TaskDataManager.class
@@ -87,6 +93,7 @@ org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$launchTaskT
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$sendTaskPidAndExecutorPid_call.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_args$_Fields.class
 org\tencent\ais\util\AISUtils.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result.class
 org\tencent\ais\executor\manager\ExecutorManager.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_args$updateTaskEvent_argsStandardSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result.class
@@ -95,6 +102,7 @@ org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Client$Fact
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result$updateTaskEvent_resultTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Processor$sendTaskPidAndExecutorPid.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$launchTaskToRun_result.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args$executorRelease_argsTupleScheme.class
 org\tencent\ais\data\util\DBUtils.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_result$_Fields.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_args$reportHeartbeat_argsTupleScheme.class
@@ -112,6 +120,7 @@ org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPid
 org\tencent\ais\communication\client\TestClient.class
 org\tencent\ais\task\event\RunTaskEvent.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$updateTaskEvent_call.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args$executorRelease_argsStandardScheme.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$launchTaskToRun_result$_Fields.class
 org\tencent\ais\util\SystemInfoUtils.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result$_Fields.class
@@ -119,6 +128,7 @@ org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$launchTaskT
 org\tencent\ais\communication\protocol\TaskMessage$TaskMessageTupleScheme.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_args$sendTaskPidAndExecutorPid_argsTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_args.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$executorRelease_call.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$launchTaskToRun_result$launchTaskToRun_resultStandardSchemeFactory.class
 org\tencent\ais\communication\protocol\ResourceMessage$ResourceMessageTupleScheme.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Processor$updateTaskEvent.class
@@ -142,8 +152,10 @@ org\tencent\ais\data\util\CommonConf.class
 org\tencent\ais\communication\protocol\ExecutorMessage.class
 org\tencent\ais\task\manager\TaskManager$2.class
 org\tencent\ais\communication\protocol\TaskMessage$TaskMessageStandardScheme.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_result$getTaskStatusByTaskId_resultTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_result$sendTaskPidAndExecutorPid_resultStandardSchemeFactory.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_args$executorRelease_argsTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor$updateTaskEvent.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$reportHeartbeat_call.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskListByClientIp_result$getTaskListByClientIp_resultTupleSchemeFactory.class
@@ -154,15 +166,19 @@ org\tencent\ais\communication\protocol\TaskMessage$TaskMessageTupleSchemeFactory
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_args$getTaskStatusByTaskId_argsTupleSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result$updateTaskEvent_resultTupleScheme.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskListByClientIp_result$getTaskListByClientIp_resultStandardSchemeFactory.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$executorRelease_result$executorRelease_resultStandardSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Processor$launchTaskToRun.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncIface.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$Processor$executorRelease.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor$getTaskListByClientIp$1.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor$executorRelease.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$reportHeartbeat_result$reportHeartbeat_resultStandardSchemeFactory.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$getTaskStatusByTaskId_args$getTaskStatusByTaskId_argsTupleScheme.class
 org\tencent\ais\communication\util\ConvertUtil.class
 org\tencent\ais\communication\protocol\TaskEvent$1.class
 org\tencent\ais\server\AISServer.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_args$updateTaskEvent_argsTupleScheme.class
+org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncProcessor$executorRelease$1.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$AsyncClient$launchTaskToRun_call.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$sendTaskPidAndExecutorPid_result.class
 org\tencent\ais\communication\protocol\MasterExecutorServiceProtocol$updateTaskEvent_result$updateTaskEvent_resultStandardScheme.class

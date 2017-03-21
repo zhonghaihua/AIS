@@ -71,5 +71,11 @@ public class MasterExecutorServiceProtocolImpl implements MasterExecutorServiceP
     return true;
   }
 
+  @Override
+  public boolean executorRelease(String executorId, String clientIp) throws TException {
+    TaskScheduler.getTaskSchedulerInstance().releaseExecutorFromClient(executorId, clientIp);
+    return true;
+  }
+
 
 }

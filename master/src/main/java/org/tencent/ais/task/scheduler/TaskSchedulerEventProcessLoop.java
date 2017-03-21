@@ -2,6 +2,8 @@ package org.tencent.ais.task.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tencent.ais.data.util.CommonConf;
+import org.tencent.ais.server.Master;
 import org.tencent.ais.task.event.*;
 
 import java.rmi.UnexpectedException;
@@ -21,7 +23,7 @@ public class TaskSchedulerEventProcessLoop extends EventLoop {
 
   @Override
   protected void onStop() {
-    // TODO cleanUp all the job and shutdown the master service
+    // do nothing
   }
 
   @Override
@@ -37,7 +39,8 @@ public class TaskSchedulerEventProcessLoop extends EventLoop {
   @Override
   protected void onError() {
     log.error("TaskSchedulerEventProcessLoop failed, shutdown the master service.");
-
+    taskScheduler.killAllExecutor();
+    CommonConf.running = false;
     // TODO shutdown all job, stop the master service
   }
 

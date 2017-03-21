@@ -75,6 +75,7 @@ public abstract class Executor {
   }
 
   public void stopTaskQueue() {
+    mespc.executorRelease(executorId, executorHostname);
     stop = true;
     taskQueue.stop();
   }

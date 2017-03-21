@@ -3,6 +3,7 @@ package org.tencent.ais.executor.manager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tencent.ais.data.manager.TaskData;
 import org.tencent.ais.data.util.CommonConf;
 import org.tencent.ais.executor.ExecutorInfo;
 import org.tencent.ais.resource.ResourceInfo;
@@ -10,7 +11,9 @@ import org.tencent.ais.task.TaskInfo;
 import org.tencent.ais.task.event.Event;
 import org.tencent.ais.task.event.FailedTaskEvent;
 import org.tencent.ais.task.scheduler.TaskScheduler;
+import org.tencent.ais.util.AISUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -107,17 +110,57 @@ public class ExecutorManager {
   }
 
 
-  private void killExecutor(String executorId, String clientIp) {
-    // kill the executor
-    Process process = executorIdToProcess.get(executorId);
-    process.destroy();
-    // 将这个executor的任务的状态全部修改为失败状态
+  public void killExecutor(String executorId, String clientIp) {
+    // 将这个executor的任务的状态全部修改为失败状态并且发送kill命令
     for (TaskInfo taskInfo : executorIdToTaskInfo.get(executorId)) {
+      killTask(taskInfo);
       Event event = new FailedTaskEvent(taskInfo);
       try {
         TaskScheduler.getTaskSchedulerInstance().getEventProcessLoop().post(event);
       } catch (InterruptedException e) {
         e.printStackTrace();
+      }
+    }
+
+    // kill the executor
+    Process process = executorIdToProcess.get(executorId);
+    process.destroy();
+    String executorPid = executorIdToPid.get(executorId);
+    String killcmd = "ssh root@" + clientIp + " 'kill -9 " + executorPid + "'";
+    try {
+      AISUtils.asynExecuShellCmd(killcmd);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    // 从clientToexecutor中移除
+    TaskScheduler.getTaskSchedulerInstance().killExecutor(clientIp, executorId);
+  }
+
+  public void killTask(TaskInfo taskInfo) {
+    TaskData taskData = taskInfo.getTaskData();
+    int taskId;
+    if (taskData.getDataType() == 0) {
+      taskId = taskData.getAccessId();
+    } else {
+      taskId = taskData.getTaskId();
+    }
+    String platformId = String.valueOf(taskData.getPlatformId());
+    String clientIp = taskInfo.getTaskClientIp();
+    String killcmd = "cd /data/iward/ais/bin/ && ./killTask -platformId " +
+            platformId + " -client " + clientIp + " -taskId " + taskId;
+    try {
+      AISUtils.execuShellCmd(killcmd);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void killAllTask() {
+    for (String executorId : executorIdToTaskInfo.keySet()) {
+      List<TaskInfo> list = executorIdToTaskInfo.get(executorId);
+      for (TaskInfo taskInfo : list) {
+        killTask(taskInfo);
       }
     }
   }
@@ -135,6 +178,18 @@ public class ExecutorManager {
       List<TaskInfo> list = new ArrayList<>();
       list.add(taskInfo);
       executorIdToTaskInfo.put(executorId, list);
+    }
+  }
+
+  public void removeExecutorIdTaskInfo(String executorId, TaskInfo taskInfo) {
+    if (executorIdToTaskInfo.containsKey(executorId)) {
+      List<TaskInfo> list = executorIdToTaskInfo.get(executorId);
+      if (list.contains(taskInfo) && list.size() == 1) {
+        executorIdToTaskInfo.remove(executorId);
+      } else if (list.contains(taskInfo) && list.size() > 1) {
+        list.remove(taskInfo);
+        executorIdToTaskInfo.put(executorId, list);
+      }
     }
   }
 
@@ -163,7 +218,9 @@ public class ExecutorManager {
 
   public void setExecutorIdToTaskPidAndExecutorPid(String executorId, String taskPid, String executorPid) {
     executorIdToTaskPid.put(executorId, taskPid);
-    executorIdToPid.put(executorId, executorPid);
+    if (!executorIdToPid.containsKey(executorId)) {
+      executorIdToPid.put(executorId, executorPid);
+    }
   }
 
 }
